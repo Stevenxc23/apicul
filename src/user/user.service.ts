@@ -22,17 +22,21 @@ export class UserService {
   findOne(id: number) {
     return this.usersRepository.findOneBy({ id });;
   }
-
   async update(id: number, updateUserDto: UpdateUserDto) {
-    return this.usersRepository.findOneBy({ id }).then((user) => {
-      if (user) {
-        this.usersRepository.merge(user, updateUserDto);
-        return this.usersRepository.save(user);
-      }
-    });
-  }
+    const user = await this.usersRepository.findOneBy({id});
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
 
-  remove(id: number) {
-    return this.usersRepository.delete(id);
+    await this.usersRepository.update(id, updateUserDto);
+    return this.usersRepository.findOneBy({id});
+  }
+  async remove(id: number) {
+    const user = await this.usersRepository.findOneBy({id});
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+    await this.usersRepository.delete(id);
+    return user; // Opcional: Devolver el usuario eliminado si se desea
   }
 }
